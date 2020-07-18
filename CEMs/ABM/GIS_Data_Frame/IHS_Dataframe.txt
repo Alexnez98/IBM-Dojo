@@ -1,0 +1,18 @@
+Hospital,PRIM_LAT_DEC,PRIM_LONG_DEC
+Page Hospital,36.9176241,-111.4635183
+Hopi Health Care Center Keams Canyon Service Unit,35.8112042,-110.3991728
+Chinle Comprehensive Health Care Facility,36.1579032,-109.607382
+Fort Defiance Indian Hospital,35.7592334,-109.0486424
+Crownpoint Health Care Facility Hospital,35.6986883,-108.1395486
+Northern Navajo Medical Center,36.8052488,-108.6917205
+Gallup Indian Medical Center,35.5076229,-108.7298069
+Tohatchi Emergency Medical Services,35.8581049,-108.762464
+Tuba City Regional Health Care Center,36.1358882,-111.2373023
+Sage Memorial Hospital|Hospital,35.7117778,-109.5429395
+Winslow Indian Health Care Center,35.0337443,-110.7146432
+dzilth-na-o-dith-hle health center,36.393344,-107.837208
+Four Corners Regional Health Center,36.961664,-109.34831
+Inscription House Health Center,36.594327,-110.791289
+Kayenta Health Center,36.704226,-110.23355
+Pinon Health Center,36.081588,-110.196182
+Tsaile Health Center,36.301471,-109.219814
