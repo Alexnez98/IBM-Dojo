@@ -11,7 +11,7 @@ def Write_to_File(mydir, iDict, MainDF, disease):
     file_names = ['inds_data', 'sick_data', 'x_coords_data','y_coords_data'
                   'age_data', 'sex_data', 'dsi_data', 'dsr_data', 'dsv_data',
                   'ebs_data', 'ebr_data', 'ebv_data', 'vac_data', 'rec_data',
-                  .txt', 'w+')
+                  '.txt', 'w+')
     OUT.close()
     
     OUT = open(mydir + 'CEMs/SimData/con_data.txt', 'w+')

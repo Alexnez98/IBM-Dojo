@@ -8,15 +8,15 @@ from scipy import special
 
 #def agg_data(i, iDict):
 
-def haversine(key, iDict, MainDF):
+def haversine(df_NN, MainDF):
     """
     Calculate the great circle distance between two points 
     on the earth (specified in decimal degrees)
     """
-    lat1 = iDict['key']['c_lat']
-    lon1 = iDict['key']['c_lon']
-    lat2 = iDict['key']['c_lat']
-    lon2 = iDict['key']['c_lon']
+    lat1 = df_NN['c_lat']
+    lon1 = df_NN['c_lon']
+    lat2 = df_NN['c_lat']
+    lon2 = df_NN['c_lon']
     
     # convert decimal degrees to radians 
     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
@@ -28,6 +28,12 @@ def haversine(key, iDict, MainDF):
     # Radius of earth in kilometers is 6371
     km = 6371 * c
     return km
+
+def time_convertor(df_NN):
+    year = df_NN['age'] / 365 # Convert the individuals age (days) to years
+    r_year = round(df_NN['age'] / 365) # Rounds the individuals age (days) to years
+    
+    return df_NN, year, r_year
 
 def modelcolor(imm):
     clr = str()
@@ -60,34 +66,28 @@ elif disease == 'Influenza':
 elif disease == 'Ebola':
     inf = 0.8 # The Mortality rate of Ebola
 
-def update_times(key, iDict, MainDF, disease):
-    ages = np.array(iDict['ages'])
+def update_times(df_NN, MainDF, disease):
+    ages = np.array(df_NN['ages'])
     ages = ages + 1 # Updates age (days) every time skip
     ages = ages.tolist()
 
-    for i, val in enumerate(iDict['vac']): 
-        iDict['dsv'] != 90
+    for i, val in enumerate(df_NN['vac']): 
+        df_NN['dsv'] != 90
         if val == 1:
-            iDict['dsv'] += 1 
-        elif iDict['dsv'] == 90:
-            iDict['vac'] = 0
+            df_NN['dsv'] += 1 
+        elif df_NN['dsv'] == 90:
+            df_NN['vac'] = 0
 
-    for i, val in enumerate(iDict['inf']):
+    for i, val in enumerate(df_NN['inf']):
         if val == 1:
-            iDict['dsi'][i] += 1
+            df_NN['dsi'][i] += 1
         elif val == 0:
-            if iDict['ebr'][i] == 1:
-                iDict['dsr'][i] += 1
+            if df_NN['ebr'][i] == 1:
+                df_NN['dsr'][i] += 1
 
-    return iDict
+    return df_NN
 
-def time_convertor(key, iDict):
-    year = iDict['key']['age'] / 365 # Convert the individuals age (days) to years
-    r_year = round(iDict['key']['age'] / 365) # Rounds the individuals age (days) to years
-    
-    return iDict, year, r_year
-
-def reproduce(key, iDict, MainDF, disease, chDict):
+def reproduce(df_NN, MainDF, disease, chDict):
     '''
     Made a function an called it reproduce assigned it the dictionary of iDict, and 
     the GIS Master Dataframe
@@ -103,18 +103,21 @@ def reproduce(key, iDict, MainDF, disease, chDict):
     #Amt_of_offspring = 1 - 1/(1+p**(x-4.2))
       
     # inds, sick, x_coords, y_coords, ages, sex
-    i1 = iDict[key]
-    x1 = iDict[key]['c_lon']
-    y1 = iDict[key]['c_lat']
+    x_list = df_NN['c_lon'].tolist
+    y_list = df_NN['c_lat'].tolist
+    
+    i1 = df_NN.index
+    x1 = x_list
+    y1 = y_list
     
     home_chapter = i1['home_chapter']
-    #print(home_chapter)
+    #print(home_chapter) 
     chDict[home_chapter] += 1
           
     x = prob_of_repro
     if x == 1:          
-        new_name = max(list(iDict)) + 1
-        iDict[new_name] = {'sex': choice('m','f'), 'age': 0, 'dsi': 0, 'dsr':0, 'dsv':0,
+        new_name = max(list(df_NN)) + 1
+        df_NN[new_name] = {'sex': choice('m','f'), 'age': 0, 'dsi': 0, 'dsr':0, 'dsv':0,
                'ebs':0, 'ebr':0, 'ebv':0, 'vac':0, 'rec':0, 'con':0, 
                'inf': 0, 'home_chapter': i1['home_chpater'] ,'c_lat': x1, 
                'c_lon': y1, 'alive': 1}
@@ -133,18 +136,18 @@ def reproduce(key, iDict, MainDF, disease, chDict):
         vac = vacinated, rec = recovered, con = con, inf = infected, c_lat = current 
         lat, c_lon = current lon. 
         '''
-    return iDict, chDict
+    return df_NN, chDict
  
-def death(key, iDict, MainDF, disease, chDict):
-  prob_of_death = 1 - (78.6/(78.6 + iDict['key']['age'])) # 78.6 is the life expect of human
+def death(df_NN, MainDF, disease, chDict):
+  prob_of_death = 1 - (78.6/(78.6 + df_NN['age'])) # 78.6 is the life expect of human
   
-  for i, val in enumerate(iDict['key']['inf']):
+  for i, val in enumerate(df_NN['inf']):
     x = int()
-    home_chapter = iDict['key']['home_chapter']
+    home_chapter = df_NN['home_chapter']
     if val == 1: x = binomial(1, inf)
     elif val == 0: x = binomial(1, prob_of_death) 
     if x == 1: 
-        iDict['alive'] = 0
+        df_NN['alive'] = 0
         chDict[home_chapter] -= 1
     '''
     if disease == "HantaVirus":
@@ -153,19 +156,19 @@ def death(key, iDict, MainDF, disease, chDict):
             iDict[key]['alive'] == 0
      '''
        
-  return iDict, chDict
+  return df_NN, chDict
 
-def infection(key, iDict, MainDF, disease, chDict):
+def infection(df_NN, MainDF, disease, chDict):
   # inds, sick, x_coords, y_coords, vac, dsi, dsr
-  i1 = randint(0,len(iDict)-1)
-  i2 = randint(0,len(iDict)-1)
+  i1 = randint(0,len(df_NN)-1)
+  i2 = randint(0,len(df_NN)-1)
   
-  x1 = iDict['c_lat']
-  x2 = iDict['c_lon'][i2]
-  y1 = iDict['c_lon'][i1]
-  y2 = iDict['c_lat'][i2]
+  x1 = df_NN['c_lat']
+  x2 = df_NN['c_lon'][i2]
+  y1 = df_NN['c_lon'][i1]
+  y2 = df_NN['c_lat'][i2]
   
-  for i, val in enumerate(iDict['inf']):
+  for i, val in enumerate(df_NN['inf']):
     D = np.sqrt((x1 - x2)**2 + (y1 - y2)**2)
     pad = 1/(1+D)
     pof = inf * pad
@@ -173,50 +176,50 @@ def infection(key, iDict, MainDF, disease, chDict):
     if disease == "HantaVirus": 
         x = np.random.binomial(1, pof)
         if x == 1:
-          iDict['inf'][i] = 1
+          df_NN['inf'][i] = 1
 
-  return iDict, chDict
+  return df_NN, chDict
 
-def recover(key, iDict, MainDF, disease, chDict):
+def recover(df_NN, MainDF, disease, chDict):
     # inds, sick, x_coords, y_coords, rec, vac, dsi, ebs, ebr
     b = .7
-    p = 1 / (1+b**(iDict['key']['dsi']-21))
+    p = 1 / (1+b**(df_NN['dsi']-21))
     
     #p = 2.22 -70/(17.5 + iDict['age'])
-    for i, val in enumerate(iDict['key']['inf']):
-        x = binomial(1, np.all(iDict['rec']))
+    for i, val in enumerate(df_NN['inf']):
+        x = binomial(1, np.all(df_NN['rec']))
         if x == 1:
-            iDict['inf'][i] = 0
+            df_NN['inf'][i] = 0
     if disease == "HantaVirus":
       x = np.random.binomial(p,1)
       if x == 1:
-          iDict['inf'] = 0      
-    return iDict, chDict
+          df_NN['inf'] = 0      
+    return df_NN, chDict
 
-def incubation(key, iDict, MainDF, disease, chDict):
+def incubation(df_NN, MainDF, disease, chDict):
     # inds, sick, x_coords, y_coords, ages, sex
-    p = 1/(np.sqrt(2*pi)*exp(-0.5*(iDict['key']['dsi'] - 17.5))*2)
+    p = 1/(np.sqrt(2*pi)*exp(-0.5*(df_NN['dsi'] - 17.5))*2)
     #incubation = np.random.uniform(7,39)
     # p = (1 - np.random.uniform(0.33,0.5))/incubation
-    for i, val in enumerate(iDict['key']['inf']):
+    for i, val in enumerate(df_NN['inf']):
         x = np.random.binomial(1,inf)
         if x == 1:   
-            iDict['key']['inf'][i] == 1
+            df_NN['inf'][i] == 1
     if disease == "HantaVirus":
         x = np.random.binomial(p,1)
         if x == 1:
-            iDict['key']['inf'] == 1
-    return iDict, chDict
+            df_NN['inf'] == 1
+    return df_NN, chDict
  
-def dispersal(key, iDict, MainDF, disease, chDict):
+def dispersal(df_NN, MainDF, disease, chDict):
   # inds, sick, x_coords, y_coords
-  for num in range(len(iDict)): 
-    i = randint(0, len(iDict[key])-1) 
-    iDict['key']['c_lat'][i] += uniform(-1, 1) 
-    iDict['key']['c_lon'] += uniform(-1, 1) 
-  return iDict, chDict
+  for num in range(len(df_NN)): 
+    i = randint(0, len(df_NN)-1) 
+    df_NN['c_lat'][i] += uniform(-1, 1) 
+    df_NN['c_lon'] += uniform(-1, 1) 
+  return df_NN, chDict
 
-def immigration(key, iDict, MainDF, disease, chDict):
+def immigration(df_NN, MainDF, disease, chDict):
   imm = list(range(11))
   m = choice(imm)
   # inds, sick, x_coords, y_coords, S, imm
@@ -236,10 +239,10 @@ def immigration(key, iDict, MainDF, disease, chDict):
     c_lat = hc_df['Lat']
     c_lon = hc_df['lon']
     
-    new_key = max(iDict[key])+1
-    iDict[new_key] = {'sex': choice('m','f'), 'age': 0, 'dsi': 0, 'dsr':0, 'dsv':0,
+    new_key = max(df_NN)+1
+    df_NN[new_key] = {'sex': choice('m','f'), 'age': 0, 'dsi': 0, 'dsr':0, 'dsv':0,
                'ebs':0, 'ebr':0, 'ebv':0, 'vac':0, 'rec':0, 'con':0, 
                'inf': s, 'home_chapter': home_chapter ,'c_lat': c_lat, 
                'c_lon': c_lon, 'alive': 1}
 
-  return iDict, chDict
+  return df_NN, chDict
