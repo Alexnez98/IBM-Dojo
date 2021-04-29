@@ -22,9 +22,6 @@ def Write_to_File(mydir, iDict, MainDF, disease):
     #       x, clr, t, imm, disease, Ni, sex, ages, inf_ded, nat_ded, NumSick, dsi, ebs, Healthy, rec, dsr, ebr, vac, A, extiny
     OUT.close()
 
-
-
-
 def Clear_to_File(mydir,x, clr,t, imm, disease, Ni,  inds, sick, x_coords, y_coords, ages,  inf_ded, nat_ded, NumSick, sex, dsi, dsr, dsv, ebs, Healthy, ebr, ebv, vac, rec, A, con):
     OUT = open(mydir + 'CEMs/SimData/inds_data.txt', 'a+')
     outlist = str(inds).strip('[]') # in the list of inds strip all "[]" from the list then assigen it to the variable of outlist

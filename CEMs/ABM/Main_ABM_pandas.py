@@ -1,9 +1,9 @@
 from __future__ import division
 import numpy as np
-from random import choice
+from random import choice, shuffle
 import sys
 import os
-import pandas as pd 
+2qaimport pandas as pd
 from numpy.random import seed
 
 # mydir = os.path.expanduser('~/GitHub/Python-ABMs/CEMs/ABM')
@@ -43,9 +43,6 @@ column_names = ['sex', 'age', 'dsi', 'dsr', 'dsv','ebs', 'ebr', 'ebv', 'vac',
                
 df_NN = pd.DataFrame(columns = column_names)
 
-#print('Numbers of rows and columns in dataframe:', df_NN.shape)
-#print('Row names of dataframe:', list(df_NN))
-
 ############ Below: filling dataframe
 
 ### Get sexes
@@ -61,11 +58,6 @@ Age_50_59 = 19469/N
 Age_60_69 = 12307/N
 Age_70_79 = 6980/N
 Age_80 = 3599/N
-
-'''
-age_groups = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-demographies = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-'''
 
 age_groups = [0, 10, 20, 30, 40, 50, 60, 70, 80]
 demographies = [Age_0_9,Age_10_19, Age_20_29, Age_30_39, Age_40_49, Age_50_59,
@@ -102,55 +94,60 @@ df_NN['con'] = 0
 df_NN['inf'] = 0
 df_NN['alive'] = 1
 
+female_df = df_NN[df_NN['sex'] == 1]
+
 for x in range(1):
-  N = 1000 #individual organisms
-  S = 1  # Number of species
-  nat_ded = 0.1
-  inf_ded = 0.6
-  imm = 2  
+    N = 1000 #individual organisms
+    S = 1  # Number of species
+    nat_ded = 0.1
+    inf_ded = 0.6
+    imm = 2  
+    # Lists for properties of individuals
+    inds = list(range(N))
+    sick = [0]*N
+    x_coords = [0]*N
+    y_coords = [0]*N 
+    ages = np.random.randint(0, 7500, len(inds)) # age in days
+    sex = np.random.binomial(1, 0.5, len(inds)) # 1 = male; 0 = female
+    dsi = [0]*N
+    dsr = [0]*N
+    ebs = [0]*N
+    ebr = [0]*N
+    vac = [0]*N
+    rec = [0]*N 
+    con = [0]*N
+    days = 1
 
-  # Lists for properties of individuals
-  inds = list(range(N))
-  sick = [0]*N
-  x_coords = [0]*N 
-  y_coords = [0]*N 
-  ages = np.random.randint(0, 7500, len(inds)) # age in days
-  sex = np.random.binomial(1, 0.5, len(inds)) # 1 = male; 0 = female
-  dsi = [0]*N
-  dsr = [0]*N
-  ebs = [0]*N
-  ebr = [0]*N
-  vac = [0]*N
-  rec = [0]*N
-  con = [0]*N
-
-  t = 0 # start at generation 0
-  while len(inds) > 0:
-    print(len(inds))
-
-    t += 1 # increment generation
-    j = choice([3
-                ])
-    if j == 0:
-      inds, sick, x_coords, y_coords = SimFxns.reproduce(inds, sick, x_coords, y_coords)
-    # take reprodution list values and assign them to inds, sick, x_coords, y_coords
-    elif j == 1:
-      inds, sick, x_coords, y_coords = SimFxns.death(inds, sick,x_coords, y_coords)
-    # take death list values and assign them to inds, sick, x_coords, y_coords
-    elif j == 2:
-      inds, sick, x_coords, y_coords = SimFxns.dispersal(inds, sick, x_coords, y_coords)
-    elif j == 3:
-      inds, sick, x_coords, y_coords = SimFxns.immigration(inds, sick, x_coords, y_coords)
-    elif j == 4:
-      inds, sick, x_coords, y_coords = SimFxns.infection(inds, sick, x_coords, y_coords)
-    elif j == 5:
-      inds, sick, x_coords, y_coords = SimFxns.recover(inds, sick, x_coords, y_coords, rec)
-    elif j == 6:
-      inds, sick, x_coords, y_coords = SimFxns.incubation(inds, sick, x_coords, y_coords)
- 
-    Ni = len(inds)
-    Si = len(list(set(sick)))
-    NumSick = sum(sick)
-    Healthy = len(sick) - sum(sick)
+    t = 0 # start at generation 0
+    for i in range(days):
+        inds = df_NN.index.tolist()
+        shuffle(inds)
+        for j, i1 in enumerate(inds):
+            if j >= 10:
+                sys.exit()
+            print(len(inds))
+            t += 1 # increment generation 
+            j = choice([0])
+            if j == 0:
+                female_df, df_NN = SimFxns.reproduce(female_df, df_NN)
+            elif j == 1:
+                inds, sick, x_coords, y_coords = SimFxns.death(inds, sick,x_coords, y_coords)
+                # take death list values and assign them to inds, sick, x_coords, y_coords
+            elif j == 2:
+                inds, sick, x_coords, y_coords = SimFxns.dispersal(inds, sick, x_coords, y_coords)
+            elif j == 3:
+                inds, sick, x_coords, y_coords = SimFxns.immigration(inds, sick, x_coords, y_coords)
+            elif j == 4:
+                inds, sick, x_coords, y_coords = SimFxns.infection(inds, sick, x_coords, y_coords)
+            elif j == 5:
+                inds, sick, x_coords, y_coords = SimFxns.recover(inds, sick, x_coords, y_coords, rec)
+            elif j == 6:
+                inds, sick, x_coords, y_coords = SimFxns.incubation(inds, sick, x_coords, y_coords)
+        Ni = len(inds)
+        Si = len(list(set(sick)))
+        NumSick = sum(sick)
+        Healthy = len(sick) - sum(sick)
+        
 print(df_NN.shape)
 print(list(df_NN))
+sys.exit()

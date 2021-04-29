@@ -2,13 +2,15 @@ from __future__ import division
 import numpy as np
 from numpy.random import binomial
 from random import choice, uniform, randint
+import sys
 from math import radians, cos, sin, asin, sqrt, pi, exp
 import scipy
+import pandas as pd
 from scipy import special
 
 #def agg_data(i, iDict):
 
-def haversine(df_NN, MainDF):
+def haversine(df_NN):
     """
     Calculate the great circle distance between two points 
     on the earth (specified in decimal degrees)
@@ -32,7 +34,7 @@ def haversine(df_NN, MainDF):
 def time_convertor(df_NN):
     year = df_NN['age'] / 365 # Convert the individuals age (days) to years
     r_year = round(df_NN['age'] / 365) # Rounds the individuals age (days) to years
-    
+     
     return df_NN, year, r_year
 
 def modelcolor(imm):
@@ -66,7 +68,7 @@ elif disease == 'Influenza':
 elif disease == 'Ebola':
     inf = 0.8 # The Mortality rate of Ebola
 
-def update_times(df_NN, MainDF, disease):
+def update_times(df_NN, disease):
     ages = np.array(df_NN['ages'])
     ages = ages + 1 # Updates age (days) every time skip
     ages = ages.tolist()
@@ -87,7 +89,8 @@ def update_times(df_NN, MainDF, disease):
 
     return df_NN
 
-def reproduce(df_NN, MainDF, disease, chDict):
+def reproduce(female_df, df_NN):
+    
     '''
     Made a function an called it reproduce assigned it the dictionary of iDict, and 
     the GIS Master Dataframe
@@ -103,28 +106,53 @@ def reproduce(df_NN, MainDF, disease, chDict):
     #Amt_of_offspring = 1 - 1/(1+p**(x-4.2))
       
     # inds, sick, x_coords, y_coords, ages, sex
-    x_list = df_NN['c_lon'].tolist
-    y_list = df_NN['c_lat'].tolist
+    N = 1000
+    inds = list(range(N))
+    sex = np.random.binomial(1, 0.5, len(inds)) # 1 = male; 0 = femal
     
-    i1 = df_NN.index
+    x_list = female_df['c_lon'].values.tolist()
+    y_list = female_df['c_lat'].values.tolist()
+   
+    i1 = female_df.index
     x1 = x_list
     y1 = y_list
     
-    home_chapter = i1['home_chapter']
+    home_chapter = female_df['home_chapter'] 
+     
     #print(home_chapter) 
-    chDict[home_chapter] += 1
-          
-    x = prob_of_repro
-    if x == 1:          
-        new_name = max(list(df_NN)) + 1
-        df_NN[new_name] = {'sex': choice('m','f'), 'age': 0, 'dsi': 0, 'dsr':0, 'dsv':0,
-               'ebs':0, 'ebr':0, 'ebv':0, 'vac':0, 'rec':0, 'con':0, 
-               'inf': 0, 'home_chapter': i1['home_chpater'] ,'c_lat': x1, 
-               'c_lon': y1, 'alive': 1}
-          
-        home_chapter = i1['home_chpater']
-        chDict[home_chapter] += 1
+    #df_NN['home_chapter'] += 1
+    
+    x = prob_of_repro0
+    print(x)
+    
+    x = 1
+    print(x)
+    if x == 1:
+        cols = ['sex', 'age', 'dsi', 'dsr', 'dsv','ebs', 'ebr', 'ebv', 'vac', 
+                'rec', 'con', 'inf', 'home_chapter', 'c_lat', 'c_lon', 'alive']
+        pd.DataFrame(columns = cols)
+        ind_df = pd.DataFrame(columns = cols)
+        ind_df['sex'] = sex
+        ind_df['age'] = 0
+        ind_df['dsi'] = 0
+        ind_df['dsr'] = 0
+        ind_df['dsv'] = 0
+        ind_df['ebs'] = 0
+        ind_df['ebr'] = 0
+        ind_df['ebv'] = 0
+        ind_df['vac'] = 0
+        ind_df['rec'] = 0
+        ind_df['con'] = 0
+        ind_df['inf'] = 0
+        ind_df['home_chapter'] = home_chapter
+        ind_df['c_lat'] = 1
+        ind_df['c_lon'] = 1
+        ind_df['alive'] = 1
         
+        df_NN = pd.concat([df_NN, ind_df])
+        print('got here', df_NN.shape)
+        print(df_NN.tail())
+        sys.exit()
         '''
         iDict[new_name] will add a new individual into the NN population.
         the sex of the new individual should be 50/50, age will be zero 
@@ -136,9 +164,10 @@ def reproduce(df_NN, MainDF, disease, chDict):
         vac = vacinated, rec = recovered, con = con, inf = infected, c_lat = current 
         lat, c_lon = current lon. 
         '''
-    return df_NN, chDict
+        
+    return df_NN, female_df
  
-def death(df_NN, MainDF, disease, chDict):
+def death(df_NN, disease):
   prob_of_death = 1 - (78.6/(78.6 + df_NN['age'])) # 78.6 is the life expect of human
   
   for i, val in enumerate(df_NN['inf']):
